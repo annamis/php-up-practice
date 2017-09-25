@@ -55,9 +55,9 @@ class ProfileController extends Controller
 
         //объект пользователя, на которого нужно подписаться
         $user = $this->findUserById($id);
-
-        $currentUser->followUser($user);
-
+        if ($currentUser->id !== $user->id) {
+            $currentUser->followUser($user);
+        }
         return $this->redirect(['/user/profile/view', 'nickname' => $user->getNickname()]);
     }
 
@@ -86,9 +86,10 @@ class ProfileController extends Controller
 
         //объект пользователя, на которого нужно подписаться
         $user = $this->findUserById($id);
-
-        $currentUser->unfollowUser($user);
-
+        
+        if ($currentUser->id !== $user->id) {
+            $currentUser->unfollowUser($user);
+        }
         return $this->redirect(['/user/profile/view', 'nickname' => $user->getNickname()]);
     }
 

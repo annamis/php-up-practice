@@ -268,4 +268,30 @@ class User extends ActiveRecord implements IdentityInterface
         return User::find()->select('id, username, nickname')->where(['id' => $ids])->orderBy('username')->asArray()->all();
     }
 
+    public function countMutualSubscriptionsTo(User $user)
+    {
+        /* @var $redis Connection */
+        $redis = Yii::$app->redis;
+        
+        //current user subscriptions
+        $key1 = "user:{$this->getId()}:subscriptions";
+        //given user followers
+        $key2 = "user:{$user->getId()}:followers";
+        $ids = $redis->sinter($key1, $key2);    
+        return count($ids);
+    }
+    
+    public function checkSubscription(User $user)
+    {
+            
+        /* @var $redis Connection */
+        $redis = Yii::$app->redis;
+        
+        //проверить входит ли id пользователя1 в множество подписчиков пользователя2
+        if ($redis->sismember("user:{$this->getId()}:subscriptions", $user->getId())) {
+            return true;
+        }
+        return false;
+    }
+
 }

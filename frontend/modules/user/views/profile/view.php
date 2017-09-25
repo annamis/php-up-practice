@@ -24,7 +24,7 @@ use yii\helpers\Url;
 <button type="button" class="btn btn-info" data-toggle="modal" data-target="#Followers"><?php echo $user->countFollowers(); ?> followers</button>
 
 <?php if ($currentUser && $currentUser->id && $currentUser->countMutualSubscriptionsTo($user)): ?>
-    <h5>Friends, who are also following <i> <?php echo Html::encode($user->username) ?> </i></h5>
+    <h5>Friends, who are also following <i> <?php echo Html::encode($user->username) ?>: <?php echo $currentUser->countMutualSubscriptionsTo($user); ?></i></h5>
     <div class="row">
         <?php foreach ($currentUser->getMutualSubscriptionsTo($user) as $item): ?>
             <div class="col-md-12">

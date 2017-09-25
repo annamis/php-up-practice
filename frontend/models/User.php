@@ -265,7 +265,9 @@ class User extends ActiveRecord implements IdentityInterface
         //given user followers
         $key2 = "user:{$user->getId()}:followers";
         $ids = $redis->sinter($key1, $key2);
-        return User::find()->select('id, username, nickname')->where(['id' => $ids])->orderBy('username')->asArray()->all();
+        $users = User::find()->select('id, username, nickname')->where(['id' => $ids])->orderBy('username')->asArray()->all();
+        unset($users[$this->getId()]);
+        return $users;
     }
 
     public function countMutualSubscriptionsTo(User $user)
@@ -277,7 +279,8 @@ class User extends ActiveRecord implements IdentityInterface
         $key1 = "user:{$this->getId()}:subscriptions";
         //given user followers
         $key2 = "user:{$user->getId()}:followers";
-        $ids = $redis->sinter($key1, $key2);    
+        $ids = $redis->sinter($key1, $key2);
+        unset($ids[$this->getId()]);
         return count($ids);
     }
     

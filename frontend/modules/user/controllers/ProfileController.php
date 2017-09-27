@@ -6,6 +6,8 @@ use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use frontend\models\User;
+use frontend\modules\user\models\forms\PictureForm;
+use yii\web\UploadedFile;
 
 /**
  * Default controller for the `user` module
@@ -23,9 +25,12 @@ class ProfileController extends Controller
         /* @var $currentUser User */
         $currentUser = Yii::$app->user->identity;
 
+        $modelPicture = new PictureForm();
+
         return $this->render('view', [
                     'user' => $this->findUser($nickname),
                     'currentUser' => $currentUser,
+                    'modelPicture' => $modelPicture,
         ]);
     }
 
@@ -86,11 +91,36 @@ class ProfileController extends Controller
 
         //объект пользователя, на которого нужно подписаться
         $user = $this->findUserById($id);
-        
+
         if ($currentUser->id !== $user->id) {
             $currentUser->unfollowUser($user);
         }
         return $this->redirect(['/user/profile/view', 'nickname' => $user->getNickname()]);
+    }
+    
+    /**
+     * Handle profile image upload via ajax request
+     */
+    public function actionUploadPicture()
+    {
+        $model = new PictureForm();
+        // в свойство picture загружаем экземпляр класса UploadedFile, который будет работать с изображением 
+        $model->picture = UploadedFile::getInstance($model, 'picture');
+        
+        if ($model->validate()) {
+            
+            $user = Yii::$app->user->identity;
+            $user->picture = Yii::$app->storage->saveUploadedFile($model->picture);
+            
+            if ($user->save(false, ['picture'])) { //валидация не требуется, сохранять только атрибут picture
+                print_r($user->attributes); die;
+            }
+            
+        }
+        echo '<pre>';
+        print_r($model->getErrors());
+        echo '</pre>';
+        
     }
 
 //        public function actionGenerate()

@@ -269,20 +269,6 @@ class User extends ActiveRecord implements IdentityInterface
         unset($users[$this->getId()]);
         return $users;
     }
-
-    public function countMutualSubscriptionsTo(User $user)
-    {
-        /* @var $redis Connection */
-        $redis = Yii::$app->redis;
-        
-        //current user subscriptions
-        $key1 = "user:{$this->getId()}:subscriptions";
-        //given user followers
-        $key2 = "user:{$user->getId()}:followers";
-        $ids = $redis->sinter($key1, $key2);
-        unset($ids[$this->getId()]);
-        return count($ids);
-    }
     
     public function checkSubscription(User $user)
     {
@@ -295,6 +281,13 @@ class User extends ActiveRecord implements IdentityInterface
             return true;
         }
         return false;
+    }
+    
+    public function getPicture() 
+    {
+        if ($this->picture) {
+            return Yii::$app->storage->getFile($this->picture);
+        }
     }
 
 }

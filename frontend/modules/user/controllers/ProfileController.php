@@ -8,6 +8,7 @@ use yii\web\NotFoundHttpException;
 use frontend\models\User;
 use frontend\modules\user\models\forms\PictureForm;
 use yii\web\UploadedFile;
+use yii\web\Response;
 
 /**
  * Default controller for the `user` module
@@ -97,30 +98,35 @@ class ProfileController extends Controller
         }
         return $this->redirect(['/user/profile/view', 'nickname' => $user->getNickname()]);
     }
-    
+
     /**
      * Handle profile image upload via ajax request
      */
     public function actionUploadPicture()
     {
+        //получать ответ в формате json, после этого в методе actionUploadPicture мы можем возврщать массивы, которые будут автоматически трансформированы в нужный формат
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
         $model = new PictureForm();
         // в свойство picture загружаем экземпляр класса UploadedFile, который будет работать с изображением 
         $model->picture = UploadedFile::getInstance($model, 'picture');
-        
+
         if ($model->validate()) {
-            
+
             $user = Yii::$app->user->identity;
             $user->picture = Yii::$app->storage->saveUploadedFile($model->picture);
-            
+
             if ($user->save(false, ['picture'])) { //валидация не требуется, сохранять только атрибут picture
-                print_r($user->attributes); die;
+                return [
+                    'success' => true,
+                    'pictureUri' => Yii::$app->storage->getFile($user->picture),
+                ];
             }
-            
         }
-        echo '<pre>';
-        print_r($model->getErrors());
-        echo '</pre>';
-        
+        return [
+            'success' => false,
+            'errors' => $model->getErrors(),
+        ];
     }
 
 //        public function actionGenerate()

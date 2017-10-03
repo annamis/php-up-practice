@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\components;
 
 use Yii;
@@ -13,7 +14,7 @@ class Storage extends Component implements StorageInterface
 {
 
     private $filename;
-    
+
     /**
      * Save given UploadedFile instance to disk
      * @param UploadedFile $file
@@ -21,18 +22,17 @@ class Storage extends Component implements StorageInterface
      */
     public function saveUploadedFile(UploadedFile $file)
     {
-       // Получить объект UploadedFile
-       // Посчитать хеш-сумму для файла (getFilename)
-       // Составить имя из хеш-суммы (getFilename)
-       // Сохранить файл на диск 
-       // Вернуть имя файла
-       
-       $path = $this->preparePath($file);
-       
-       if ($path && $file->saveAs($path)) {
-           return $this->filename;
-       }
-        
+        // Получить объект UploadedFile
+        // Посчитать хеш-сумму для файла (getFilename)
+        // Составить имя из хеш-суммы (getFilename)
+        // Сохранить файл на диск 
+        // Вернуть имя файла
+
+        $path = $this->preparePath($file);
+
+        if ($path && $file->saveAs($path)) {
+            return $this->filename;
+        }
     }
 
     /**
@@ -45,7 +45,6 @@ class Storage extends Component implements StorageInterface
         //Получает имя файла
         $this->filename = $this->getFileName($file);
         //     0c/a9/277f91e40054767f69afeb0426711ca0fddd.jpg
-         
         //Получает путь к папке, в которую нужно сохранить файл
         $path = $this->getStoragePath() . $this->filename;
         //     /var/www/project/frontend/web/uploads/0c/a9/277f91e40054767f69afeb0426711ca0fddd.jpg
@@ -62,14 +61,14 @@ class Storage extends Component implements StorageInterface
      */
     protected function getFilename(UploadedFile $file)
     {
-        
+
         // Временное хранилище $file->tempname   -   /tmp/qio93kf
 
         $hash = sha1_file($file->tempName); // 0ca9277f91e40054767f69afeb0426711ca0fddd
 
         $name = substr_replace($hash, '/', 2, 0);
         $name = substr_replace($name, '/', 5, 0);  // 0c/a9/277f91e40054767f69afeb0426711ca0fddd
-        
+
         return $name . '.' . $file->extension;  // 0c/a9/277f91e40054767f69afeb0426711ca0fddd.jpg
     }
 

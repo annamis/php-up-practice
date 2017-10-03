@@ -292,5 +292,5 @@ class User extends ActiveRecord implements IdentityInterface
         }
         return self::DEFAULT_IMAGE;
     }
-
+    
 }

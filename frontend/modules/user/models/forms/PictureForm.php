@@ -15,6 +15,8 @@ class PictureForm extends Model
             [['picture'], 'file',
                 'extensions' => ['jpg'],
                 'checkExtensionByMimeType' => true,
+                'maxSize' => Yii::$app->params['maxFileSize'], 
+                'tooBig' => 'Limit is 2MB'
             ],
         ];
     }

@@ -18,7 +18,7 @@ use dosamigos\fileupload\FileUpload;
 <div class="alert alert-success display-none" id="profile-image-success">Profile image updated</div>
 <div class="alert alert-danger display-none" id="profile-image-fail"></div>
 
-<?php if ($currentUser->equals($user)): ?>
+<?php if ($currentUser && $currentUser->equals($user)): ?>
     <?=
     FileUpload::widget([
         'model' => $modelPicture,
@@ -39,17 +39,20 @@ use dosamigos\fileupload\FileUpload;
         ],
     ]);
     ?>
+
+<a href="<?php echo Url::to(['/user/profile/delete-picture']); ?>" class="btn btn-danger">Delete profile image</a>
+
 <?php else: ?>
 
-    <?php if (!$currentUser->checkSubscription($user)): ?>
+    <?php if ($currentUser && !$currentUser->checkSubscription($user)): ?>
         <a href="<?php echo Url::to(['/user/profile/subscribe', 'id' => $user->getId()]); ?>" class="btn btn-success">Subscribe</a>
         <hr>
-    <?php else: ?>
+    <?php elseif ($currentUser): ?>
         <a href="<?php echo Url::to(['/user/profile/unsubscribe', 'id' => $user->getId()]); ?>" class="btn btn-danger">Unsubscribe</a>
         <hr>
     <?php endif; ?>
 
-    <?php if ($currentUser): ?>
+    <?php if ($currentUser && !$currentUser->equals($user)): ?>
         <h5>Friends, who are also following <i> <?php echo Html::encode($user->username) ?></i></h5>
         <div class="row">
             <?php foreach ($currentUser->getMutualSubscriptionsTo($user) as $item): ?>

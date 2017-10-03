@@ -9,6 +9,7 @@ use frontend\models\User;
 use frontend\modules\user\models\forms\PictureForm;
 use yii\web\UploadedFile;
 use yii\web\Response;
+use Intervention\Image\ImageManager;
 
 /**
  * Default controller for the `user` module
@@ -104,6 +105,7 @@ class ProfileController extends Controller
      */
     public function actionUploadPicture()
     {
+
         //получать ответ в формате json, после этого в методе actionUploadPicture мы можем возврщать массивы, которые будут автоматически трансформированы в нужный формат
         Yii::$app->response->format = Response::FORMAT_JSON;
 
@@ -112,6 +114,20 @@ class ProfileController extends Controller
         $model->picture = UploadedFile::getInstance($model, 'picture');
 
         if ($model->validate()) {
+//            echo '<pre>';
+//            print_r($model->picture);
+//            echo '</pre>';
+//            die;
+            // create an image manager instance with favored driver
+            $manager = new ImageManager(array('driver' => 'imagick'));
+
+            // to finally create image instances
+            $image = $manager->make($model->picture->tempName);
+
+            if ($image->width() >= Yii::$app->params['maxImageWidth'] || $image->height() >= Yii::$app->params['maxImageHeight']) {
+                $image->resize(Yii::$app->params['maxImageWidth'], Yii::$app->params['maxImageHeight']);
+            }
+            $image->save();
 
             $user = Yii::$app->user->identity;
             $user->picture = Yii::$app->storage->saveUploadedFile($model->picture);
@@ -128,6 +144,18 @@ class ProfileController extends Controller
             'errors' => $model->getErrors(),
         ];
     }
+
+//    public function actionDeletePicture()
+//    {
+//
+//        /* @var $currentUser User */
+//        $currentUser = Yii::$app->user->identity;
+//
+//        if ($currentUser->picture) {
+//            Yii::$app->storage->deleteFile($currentUser->picture);
+//            Yii::$app->session->setFlash('success', 'Picture is deleted');
+//        }
+//    }
 
 //        public function actionGenerate()
 //    {

@@ -15,6 +15,7 @@ use Yii;
  */
 class Post extends \yii\db\ActiveRecord
 {
+
     /**
      * @inheritdoc
      */
@@ -36,12 +37,12 @@ class Post extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
         ];
     }
-    
+
     public function getImage()
     {
         return Yii::$app->storage->getFile($this->filename);
     }
-    
+
     /**
      * Get author of the post
      * @return User|null
@@ -51,4 +52,55 @@ class Post extends \yii\db\ActiveRecord
         // у каждого поста может быть 1 автор
         return $this->hasOne(User::className(), ['id' => 'user_id'])->one();
     }
+
+    /**
+     * Like current post by given user
+     * @param \frontend\models\User $user
+     */
+    public function like(User $user)
+    {
+        /* @var $redis Connection */
+        $redis = Yii::$app->redis;
+        //"post: {$this->getId()}:likes" - список пользователей, которые лайкнули пост
+        $redis->sadd("post:{$this->getId()}:likes", $user->getId());
+        //"user: {$user->getId()}:likes" - список постов, которые лайкнул пользователь
+        $redis->sadd("user:{$user->getId()}:likes", $this->getId());
+    }
+
+    /**
+     * Unlike current post by given user
+     * @param \frontend\models\User $user
+     */
+    public function unLike(User $user)
+    {
+        /* @var $redis Connection */
+        $redis = Yii::$app->redis;
+        $redis->srem("post:{$this->getId()}:likes", $user->getId());
+        $redis->srem("user:{$user->getId()}:likes", $this->getId());
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function countLikes()
+    {
+        /* @var $redis Connection */
+        $redis = Yii::$app->redis;
+        //подсчитывает количество элементов в множеcтве
+        return $redis->scard("post:{$this->getId()}:likes");
+    }
+
+    public function isLikedBy(User $user)
+    {
+        /* @var $redis Connection */
+        $redis = Yii::$app->redis;
+        //является ли идентификатор пользователя одним из членов множества лайков поста
+        return $redis->sismember("post:{$this->getId()}:likes", $user->getId());
+    }
+
 }

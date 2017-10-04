@@ -123,3 +123,20 @@ a.desc:after {
 {
     display: none;
 }
+
+.gi-2x
+{
+    font-size: 2em;
+}
+
+.red {
+    color: red;
+}
+
+.grey {
+    color: grey;
+}
+
+.post-default-index a:hover{
+    text-decoration: none;
+}

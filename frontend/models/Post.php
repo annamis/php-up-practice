@@ -94,6 +94,14 @@ class Post extends \yii\db\ActiveRecord
         //подсчитывает количество элементов в множеcтве
         return $redis->scard("post:{$this->getId()}:likes");
     }
+    
+    /**
+     * @return int
+     */
+    public function countComments()
+    {    
+        return $this->hasMany(Comment::className(), ['post_id' => 'id'])->count();
+    }
 
     public function isLikedBy(User $user)
     {

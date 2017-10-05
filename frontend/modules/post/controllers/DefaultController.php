@@ -9,6 +9,8 @@ use yii\web\UploadedFile;
 use frontend\models\Post;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use frontend\models\forms\CommentForm;
+use frontend\models\Comment;
 
 /**
  * Default controller for the `post` module
@@ -45,16 +47,30 @@ class DefaultController extends Controller
         /* @var $currentUser User */
         $currentUser = Yii::$app->user->identity;
         
+        $post = $this->findPost($id);        
+
+        if ($currentUser) {
+            $model = new CommentForm($currentUser, $id);
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                Yii::$app->session->setFlash('success', 'Comment added');
+                return $this->refresh();
+            }
+        } else {
+            $model = false;
+        }
+    
         return $this->render('view', [
-                    'post' => $this->findPost($id),
+                    'post' => $post,
                     'currentUser' => $currentUser,
+                    'model' => $model,
+                    'comments' => $this->getComments($id),
         ]);
     }
 
     //задача: проверить на null (и выкинуть ошибку) или вернуть объект. ПОИСКОМ ЗАНИМАЕТСЯ POST::
     public function findPost($id)
     {
-        if ($user = Post::findOne($id)) {
+        if ($user = Post::find()->where(['id' => $id])->one()) {
             return $user;
         }
         throw new NotFoundHttpException('Post doesn\'t exist.');
@@ -108,6 +124,12 @@ class DefaultController extends Controller
             'success' => true,
             'likesCount' => $post->countLikes(),
         ];
+    }
+
+    public function getComments($postId)
+    {
+        //all() возвращает массив всегда (пустой или нет)
+        return Comment::find()->where(['post_id' => $postId])->orderBy('created_at DESC')->all();
     }
 
 }

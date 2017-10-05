@@ -40,8 +40,6 @@ use dosamigos\fileupload\FileUpload;
     ]);
     ?>
 
-<a href="<?php echo Url::to(['/user/profile/delete-picture']); ?>" class="btn btn-danger">Delete profile image</a>
-
 <?php else: ?>
 
     <?php if ($currentUser && !$currentUser->checkSubscription($user)): ?>

@@ -137,6 +137,6 @@ a.desc:after {
     color: grey;
 }
 
-.post-default-index a:hover{
+.post-default-view a:hover{
     text-decoration: none;
 }

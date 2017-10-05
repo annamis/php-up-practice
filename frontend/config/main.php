@@ -6,6 +6,7 @@ $params = array_merge(
 
 return [
     'id' => 'app-frontend',
+    'language' => 'ru-RU',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
@@ -15,6 +16,9 @@ return [
         ],
         'post' => [
             'class' => 'frontend\modules\post\Module',
+        ],
+        'comment' => [
+            'class' => 'frontend\modules\comment\Module',
         ],
     ],
     'components' => [

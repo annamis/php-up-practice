@@ -24,6 +24,11 @@ class DefaultController extends Controller
      */
     public function actionCreate()
     {
+
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['/user/default/login']);
+        }
+        
         $model = new PostForm(Yii::$app->user->identity);
 
         if ($model->load(Yii::$app->request->post())) {
@@ -34,6 +39,7 @@ class DefaultController extends Controller
 
             if ($model->save()) {
                 Yii::$app->session->setFlash('success', 'Post created');
+//                return $this->redirect('/post/' . $postId);
                 return $this->goHome();
             }
         }
@@ -46,8 +52,8 @@ class DefaultController extends Controller
     {
         /* @var $currentUser User */
         $currentUser = Yii::$app->user->identity;
-        
-        $post = $this->findPost($id);        
+
+        $post = $this->findPost($id);
 
         if ($currentUser) {
             $model = new CommentForm($currentUser, $id);
@@ -58,7 +64,7 @@ class DefaultController extends Controller
         } else {
             $model = false;
         }
-    
+
         return $this->render('view', [
                     'post' => $post,
                     'currentUser' => $currentUser,

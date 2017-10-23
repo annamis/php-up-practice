@@ -6,7 +6,7 @@ use Yii;
 use yii\base\NotSupportedException;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
-
+use yii\behaviors\TimestampBehavior;
 
 /**
  * User model
@@ -31,7 +31,6 @@ class User extends ActiveRecord implements IdentityInterface
 
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
-    
     const DEFAULT_IMAGE = '/img/profile_default_image.jpg';
 
     /**
@@ -45,13 +44,23 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * @inheritdoc
      */
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::className(),
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
             ['nickname', 'string', 'length' => [5, 15]],
-            ];
+        ];
     }
 
     /**
@@ -193,6 +202,10 @@ class User extends ActiveRecord implements IdentityInterface
         return ($this->nickname) ? $this->nickname : $this->getId();
     }
 
+    /**
+     * Subscribe current user to given user
+     * @param \frontend\models\User $user
+     */
     public function followUser(User $user)
     {
 
@@ -203,6 +216,10 @@ class User extends ActiveRecord implements IdentityInterface
         $redis->sadd("user:{$user->getId()}:followers", $this->getId());
     }
 
+    /**
+     * Unsubscribe current user from given user
+     * @param \frontend\models\User $user
+     */
     public function unfollowUser(User $user)
     {
 
@@ -213,6 +230,9 @@ class User extends ActiveRecord implements IdentityInterface
         $redis->srem("user:{$user->getId()}:followers", $this->getId());
     }
 
+    /**
+     * @return array
+     */
     public function getSubscriptions()
     {
         /* @var $redis Connection */
@@ -222,6 +242,9 @@ class User extends ActiveRecord implements IdentityInterface
         return User::find()->select('id, username, nickname')->where(['id' => $ids])->orderBy('username')->asArray()->all();
     }
 
+    /**
+     * @return array
+     */
     public function getFollowers()
     {
         /* @var $redis Connection */
@@ -230,7 +253,7 @@ class User extends ActiveRecord implements IdentityInterface
         $ids = $redis->smembers($key);
         return User::find()->select('id, username, nickname')->where(['id' => $ids])->orderBy('username')->asArray()->all();
     }
-    
+
     public function countSubscriptions()
     {
         /* @var $redis Connection */
@@ -247,11 +270,15 @@ class User extends ActiveRecord implements IdentityInterface
         return $redis->scard($key);
     }
 
+    /**
+     * @param \frontend\models\User $user
+     * @return array
+     */
     public function getMutualSubscriptionsTo(User $user)
     {
         /* @var $redis Connection */
         $redis = Yii::$app->redis;
-        
+
         //current user subscriptions
         $key1 = "user:{$this->getId()}:subscriptions";
         //given user followers
@@ -261,26 +288,58 @@ class User extends ActiveRecord implements IdentityInterface
         unset($users[$this->getId()]);
         return $users;
     }
-    
+
+    /**
+     * @param \frontend\models\User $user
+     * @return bool
+     */
     public function checkSubscription(User $user)
     {
-            
+
         /* @var $redis Connection */
         $redis = Yii::$app->redis;
-        
+
         //проверить входит ли id пользователя1 в множество подписчиков пользователя2
         if ($redis->sismember("user:{$this->getId()}:subscriptions", $user->getId())) {
             return true;
         }
         return false;
     }
-    
-    public function getPicture() 
+
+    /**
+     * Get profile picture
+     * @return string
+     */
+    public function getPicture()
     {
         if ($this->picture) {
             return Yii::$app->storage->getFile($this->picture);
         }
         return self::DEFAULT_IMAGE;
     }
-    
+
+    /**
+     * Get data for newsfeed
+     * @param integer $limit
+     * @return array
+     */
+    public function getFeed(int $limit)
+    {
+        $order = ['post_created_at' => SORT_DESC]; //по дате по спаданию
+        //для каждого пользователя можно найти несколько записей в таблице Feed 1:M
+        return $this->hasMany(Feed::className(), ['user_id' => 'id'])->orderBy($order)->limit($limit)->all();
+    }
+
+    /**
+     * Check whether current user likes post with given id
+     * @param integer $postId
+     * @return boolean
+     */
+    public function likesPost(int $postId)
+    {
+        /* @var $redis Connection */
+        $redis = Yii::$app->redis;
+        return (bool) $redis->sismember("user:{$this->getId()}:likes", $postId);
+    }
+
 }

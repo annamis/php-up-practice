@@ -23,7 +23,7 @@ use dosamigos\fileupload\FileUpload;
     FileUpload::widget([
         'model' => $modelPicture,
         'attribute' => 'picture',
-        'url' => ['/user/profile/upload-picture'], // your url, this is just for demo purposes,
+        'url' => ['/user/profile/upload-picture'], // your url
         'options' => ['accept' => 'image/*'],
         'clientEvents' => [
             'fileuploaddone' => 'function(e, data) {

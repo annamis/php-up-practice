@@ -110,5 +110,5 @@ class Post extends \yii\db\ActiveRecord
         //является ли идентификатор пользователя одним из членов множества лайков поста
         return $redis->sismember("post:{$this->getId()}:likes", $user->getId());
     }
-
+// fk-auth-user_id-user-id
 }

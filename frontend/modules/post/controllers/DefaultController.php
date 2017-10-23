@@ -64,7 +64,7 @@ class DefaultController extends Controller
         } else {
             $model = false;
         }
-
+       
         return $this->render('view', [
                     'post' => $post,
                     'currentUser' => $currentUser,

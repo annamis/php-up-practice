@@ -2,7 +2,7 @@
 /* @var $this yii\web\View */
 /* @var $user frontend\models\User */
 /* @var $currentUser frontend\models\User */
-/* $var $modelPicture frontend\modules\user\models\forms\PictureForm */
+/* @var $modelPicture frontend\modules\user\models\forms\PictureForm */
 
 use yii\helpers\Html;
 use yii\helpers\HtmlPurifier;
@@ -111,5 +111,16 @@ use dosamigos\fileupload\FileUpload;
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="container ">
+    <div class="row">
+                <?php foreach ($user->getPosts() as $post): ?>
+                <div class="col-lg-4">
+                    <img class="img-responsive" src="<?php echo $post->getImage(); ?>">
+                </div>
+            <?php endforeach; ?>
+
     </div>
 </div>

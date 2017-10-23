@@ -28,7 +28,7 @@ class ProfileController extends Controller
         $currentUser = Yii::$app->user->identity;
 
         $modelPicture = new PictureForm();
-
+        
         return $this->render('view', [
                     'user' => $this->findUser($nickname),
                     'currentUser' => $currentUser,

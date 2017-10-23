@@ -341,5 +341,13 @@ class User extends ActiveRecord implements IdentityInterface
         $redis = Yii::$app->redis;
         return (bool) $redis->sismember("user:{$this->getId()}:likes", $postId);
     }
+    
+    /**
+     * @return array|Post[]
+     */
+    public function getPosts()
+    {
+        return $this->hasMany(Post::className(), ['user_id' => 'id'])->all();
+    }
 
 }

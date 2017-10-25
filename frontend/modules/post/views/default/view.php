@@ -9,7 +9,7 @@ use yii\web\JqueryAsset;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
 ?>
-<div class="post-default-view">
+<div class="post-default-view center">
 
     <div class="row">
 

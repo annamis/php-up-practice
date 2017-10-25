@@ -140,3 +140,18 @@ a.desc:after {
 .post-default-view a:hover{
     text-decoration: none;
 }
+
+.padding-bottom-20 {
+    padding-bottom: 20px;
+}
+
+.relative-time{
+    font-size: 12px;
+    color: grey;
+}
+
+.center {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}

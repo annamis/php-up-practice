@@ -3,6 +3,7 @@
 /* @var $user frontend\models\User */
 /* @var $currentUser frontend\models\User */
 /* @var $modelPicture frontend\modules\user\models\forms\PictureForm */
+/* @var $post frontend\models\Post */
 
 use yii\helpers\Html;
 use yii\helpers\HtmlPurifier;
@@ -64,9 +65,15 @@ use dosamigos\fileupload\FileUpload;
     <?php endif; ?>
 <?php endif; ?>
 
-<hr>        
-<button type="button" class="btn btn-info" data-toggle="modal" data-target="#Subscriptions"><?php echo $user->countSubscriptions(); ?> subscriptions</button>
-<button type="button" class="btn btn-info" data-toggle="modal" data-target="#Followers"><?php echo $user->countFollowers(); ?> followers</button>
+<hr> 
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 padding-bottom-20">
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#Subscriptions"><?php echo $user->countSubscriptions(); ?> subscriptions</button>
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#Followers"><?php echo $user->countFollowers(); ?> followers</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal -->
 <div id="Subscriptions" class="modal fade" role="dialog">
@@ -116,11 +123,12 @@ use dosamigos\fileupload\FileUpload;
 
 <div class="container ">
     <div class="row">
-                <?php foreach ($user->getPosts() as $post): ?>
-                <div class="col-lg-4">
+        <?php foreach ($user->getPosts() as $post): ?>
+            <div class="col-lg-4 padding-bottom-20">
+                <a href="<?php echo Url::to(['/post/default/view', 'id' => $post->id]); ?>">
                     <img class="img-responsive" src="<?php echo $post->getImage(); ?>">
-                </div>
-            <?php endforeach; ?>
-
+                </a>
+            </div>
+        <?php endforeach; ?>
     </div>
 </div>

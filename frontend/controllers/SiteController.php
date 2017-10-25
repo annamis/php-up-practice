@@ -21,7 +21,6 @@ class SiteController extends Controller
             'error' => [
                 'class' => 'yii\web\ErrorAction',
             ],
-
         ];
     }
 
@@ -35,17 +34,17 @@ class SiteController extends Controller
         if (Yii::$app->user->isGuest) {
             return $this->redirect('/user/default/login');
         }
-        
-        /* @var $currentUser User*/
+
+        /* @var $currentUser User */
         $currentUser = Yii::$app->user->identity;
-        
+
         $limit = Yii::$app->params['feedPostLimit'];
         //записи из новостной ленты для указанного пользователя
-        $feedItems = $currentUser->getFeed($limit);       
-        
+        $feedItems = $currentUser->getFeed($limit);
+
         return $this->render('index', [
-            'feedItems' => $feedItems,
-            'currentUser' => $currentUser,
+                    'feedItems' => $feedItems,
+                    'currentUser' => $currentUser,
         ]);
     }
 

@@ -63,7 +63,7 @@ class Feed extends \yii\db\ActiveRecord
      */
     public function countComments()
     {    
-        return $this->hasMany(Comment::className(), ['post_id' => 'id'])->count();
+        return $this->hasMany(Comment::className(), ['post_id' => 'post_id'])->count();
     }
 
 }

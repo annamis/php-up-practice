@@ -105,44 +105,24 @@ class ProfileController extends Controller
      */
     public function actionUploadPicture()
     {
-
-        //получать ответ в формате json, после этого в методе actionUploadPicture мы можем возврщать массивы, которые будут автоматически трансформированы в нужный формат
         Yii::$app->response->format = Response::FORMAT_JSON;
-
+        
         $model = new PictureForm();
-        // в свойство picture загружаем экземпляр класса UploadedFile, который будет работать с изображением 
         $model->picture = UploadedFile::getInstance($model, 'picture');
 
-        if ($model->validate()) {
-//            echo '<pre>';
-//            print_r($model->picture);
-//            echo '</pre>';
-//            die;
-            // create an image manager instance with favored driver
-            $manager = new ImageManager(array('driver' => 'imagick'));
-
-            // to finally create image instances
-            $image = $manager->make($model->picture->tempName);
-
-            if ($image->width() >= Yii::$app->params['maxImageWidth'] || $image->height() >= Yii::$app->params['maxImageHeight']) {
-                $image->resize(Yii::$app->params['maxImageWidth'], Yii::$app->params['maxImageHeight']);
-            }
-            $image->save();
-
+        if ($model->validate()) {   
+            
             $user = Yii::$app->user->identity;
-            $user->picture = Yii::$app->storage->saveUploadedFile($model->picture);
-
-            if ($user->save(false, ['picture'])) { //валидация не требуется, сохранять только атрибут picture
+            $user->picture = Yii::$app->storage->saveUploadedFile($model->picture); // 15/27/30379e706840f951d22de02458a4788eb55f.jpg
+            
+            if ($user->save(false, ['picture'])) {
                 return [
-                    'success' => true,
+                    'success' => true, 
                     'pictureUri' => Yii::$app->storage->getFile($user->picture),
                 ];
             }
         }
-        return [
-            'success' => false,
-            'errors' => $model->getErrors(),
-        ];
+        return ['success' => false, 'errors' => $model->getErrors()];
     }
 
 //    public function actionDeletePicture()

@@ -362,6 +362,8 @@ footer .footer p.text {
     display: inline-block;
     overflow: hidden;
     left: 25px;
+    width: 50px;
+    height: 50px;
 }
 
 .comments-post ul.comment-list li .comment-info {

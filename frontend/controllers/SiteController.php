@@ -47,5 +47,14 @@ class SiteController extends Controller
                     'currentUser' => $currentUser,
         ]);
     }
+    
+    /**
+     * About page
+     * @return mixed
+     */
+    public function actionAbout()
+    {
+        return $this->render('about');
+    }
 
 }

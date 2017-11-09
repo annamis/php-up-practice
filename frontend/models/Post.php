@@ -94,15 +94,20 @@ class Post extends \yii\db\ActiveRecord
         //подсчитывает количество элементов в множеcтве
         return $redis->scard("post:{$this->getId()}:likes");
     }
-    
+
     /**
      * @return int
      */
     public function countComments()
-    {    
+    {
         return $this->hasMany(Comment::className(), ['post_id' => 'id'])->count();
     }
 
+    /**
+     * Check whether given user liked current post
+     * @param \frontend\models\User $user
+     * @return integer
+     */
     public function isLikedBy(User $user)
     {
         /* @var $redis Connection */
@@ -110,5 +115,24 @@ class Post extends \yii\db\ActiveRecord
         //является ли идентификатор пользователя одним из членов множества лайков поста
         return $redis->sismember("post:{$this->getId()}:likes", $user->getId());
     }
+
+    /**
+     * Add complaint to post from given user
+     * @param \frontend\models\User $user
+     * @return boolean
+     */
+    public function complain(User $user)
+    {
+         /* @var $redis Connection */
+        $redis = Yii::$app->redis;
+        $key = "post:{$this->getId()}:complaints"; //формируем ключ post:10:complaints
+        
+        if (!$redis->sismember($key, $user->getId())) { //если в множестве нет id пользователя (еще не жаловался)
+            $redis->sadd($key, $user->getId());        
+            $this->complaints++; //увеличиваем счетчик жалоб
+            return $this->save(false, ['complaints']); //сохраняем этот счетчик в таблице post в поле complaints 
+        }
+    }
+
 // fk-auth-user_id-user-id
 }

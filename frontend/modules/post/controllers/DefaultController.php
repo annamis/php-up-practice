@@ -28,7 +28,7 @@ class DefaultController extends Controller
         if (Yii::$app->user->isGuest) {
             return $this->redirect(['/user/default/login']);
         }
-        
+
         $model = new PostForm(Yii::$app->user->identity);
 
         if ($model->load(Yii::$app->request->post())) {
@@ -64,7 +64,7 @@ class DefaultController extends Controller
         } else {
             $model = false;
         }
-       
+
         return $this->render('view', [
                     'post' => $post,
                     'currentUser' => $currentUser,
@@ -129,6 +129,33 @@ class DefaultController extends Controller
         return [
             'success' => true,
             'likesCount' => $post->countLikes(),
+        ];
+    }
+
+    public function actionComplain()
+    {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['/user/default/login']);
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON; //формат ответа json, так как мы будем возвращать просто массивы, которые позже транслируются в json
+
+        $id = Yii::$app->request->post('id'); //получаем из запроса id поста, на который пожаловались
+
+        /* @var $currentUser User */
+        $currentUser = Yii::$app->user->identity;
+
+        $post = $this->findPost($id); //находим пост, на который пожаловались
+
+        if ($post->complain($currentUser)) {
+            return [
+                'success' => true,
+                'text' => 'Post reported',
+            ];
+        }
+        return [
+            'success' => false,
+            'text' => 'Error',
         ];
     }
 

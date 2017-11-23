@@ -6,7 +6,6 @@ use yii\web\Controller;
 use frontend\models\User;
 use Yii;
 use yii\web\Cookie;
-use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**

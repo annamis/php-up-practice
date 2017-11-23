@@ -21,6 +21,12 @@ $this->title = 'Complains';
 
                 <p><a class="btn btn-default" href="<?php echo Url::to(['/complaints/manage']); ?>">Manage</a></p>
             </div>
+            <?php 
+            echo '<pre>';
+            var_dump(Yii::$app->user->can('viewComplaintsList'));
+            echo '</pre>';
+            
+            ?>
         </div>
     </div>
 </div>

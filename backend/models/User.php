@@ -1,4 +1,5 @@
 <?php
+
 namespace backend\models;
 
 use Yii;
@@ -6,6 +7,7 @@ use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
+use yii\helpers\ArrayHelper;
 
 /**
  * User model
@@ -20,12 +22,17 @@ use yii\web\IdentityInterface;
  * @property integer $created_at
  * @property integer $updated_at
  * @property string $password write-only password
+ * @property string picture
  */
 class User extends ActiveRecord implements IdentityInterface
 {
+
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
+    const ROLE_ADMIN = 'admin';
+    const ROLE_MODERATOR = 'moderator';
 
+    public $roles;
 
     /**
      * @inheritdoc
@@ -35,9 +42,6 @@ class User extends ActiveRecord implements IdentityInterface
         return '{{%user}}';
     }
 
-    /**
-     * @inheritdoc
-     */
     public function behaviors()
     {
         return [
@@ -45,12 +49,16 @@ class User extends ActiveRecord implements IdentityInterface
         ];
     }
 
-    /**
-     * @inheritdoc
-     */
+    public function __construct($config)
+    {
+        $this->on(self::EVENT_AFTER_UPDATE, [$this, 'saveRoles']);
+        return parent::__construct($config);
+    }
+
     public function rules()
     {
         return [
+            ['roles', 'safe'], //чтобы roles проходило валидацию и могло сохраниться
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
         ];
@@ -96,8 +104,8 @@ class User extends ActiveRecord implements IdentityInterface
         }
 
         return static::findOne([
-            'password_reset_token' => $token,
-            'status' => self::STATUS_ACTIVE,
+                    'password_reset_token' => $token,
+                    'status' => self::STATUS_ACTIVE,
         ]);
     }
 
@@ -185,5 +193,62 @@ class User extends ActiveRecord implements IdentityInterface
     public function removePasswordResetToken()
     {
         $this->password_reset_token = null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getImage()
+    {
+        if ($this->picture) {
+            return Yii::$app->storage->getFile($this->picture);
+        }
+    }
+
+    public function getRolesCheckbox()
+    {
+        return [
+            self::ROLE_ADMIN => 'Admin',
+            self::ROLE_MODERATOR => 'Moderator',
+        ];
+    }
+
+    /**
+     * Revoke old roles and asign new if any
+     */
+    public function saveRoles()
+    {
+        Yii::$app->authManager->revokeAll($this->getId()); //удаляем старые роли у пользователя
+
+        if (is_array($this->roles)) {
+            foreach ($this->roles as $roleName) {
+                if ($role = Yii::$app->authManager->getRole($roleName)) { //находим роль в authManager, если онасуществует
+                    Yii::$app->authManager->assign($role, $this->getId()); //присваиваем роль пользователю
+                }
+            }
+        }
+    }
+
+    /**
+     * Populate roles attribute with data from RBAC after record loaded from DB 
+     */
+    public function afterFind()
+    {
+        $this->roles = $this->getRoles();
+    }
+
+    /**
+     * Get user roles from RBAC
+     * @return array
+     */
+    public function getRoles()
+    {
+        $roles = Yii::$app->authManager->getRolesByUser($this->getId()); //читает из authManager роли по id текущего пользователя
+        return ArrayHelper::getColumn($roles, 'name', false); //преобразовует к нужному виду для списка
+    }
+    
+    public function hasRoles()
+    {
+        return !empty($this->getRoles());
     }
 }

@@ -49,7 +49,7 @@ class User extends ActiveRecord implements IdentityInterface
         ];
     }
 
-    public function __construct($config)
+    public function __construct($config = [])
     {
         $this->on(self::EVENT_AFTER_UPDATE, [$this, 'saveRoles']);
         return parent::__construct($config);

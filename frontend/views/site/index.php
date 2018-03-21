@@ -7,6 +7,7 @@ use yii\web\JqueryAsset;
 use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\helpers\HtmlPurifier;
+use Yii;
 
 $this->title = 'Feed';
 ?>
@@ -57,10 +58,10 @@ $this->title = 'Feed';
                                     <div class="post-report">
                                         <?php if (!$feedItem->isReported($currentUser)): ?>
                                             <a href="#" class="btn btn-default button-complain" data-id="<?php echo $feedItem->post_id; ?>">
-                                                Report post <i class="fa fa-cog fa-spin fa-fw icon-preloader" style="display:none"></i>
+                                                <?php echo Yii::t('index', 'Report post')?> <i class="fa fa-cog fa-spin fa-fw icon-preloader" style="display:none"></i>
                                             </a>
                                         <?php else: ?>
-                                            <p>Post has been reported</p>
+                                            <p><?php echo Yii::t('index', 'Post has been reported!')?></p>
                                         <?php endif; ?>   
                                     </div>
                                 </div>
@@ -70,7 +71,7 @@ $this->title = 'Feed';
 
                     <?php else: ?>
                         <div class="col-md-12">
-                            Nobody posted yet!
+                             <p><?php echo Yii::t('index', 'Nobody posted yet!')?></p>
                         </div>
                     <?php endif; ?>
                 </div>

@@ -9,7 +9,7 @@ use frontend\models\User;
 use frontend\modules\user\models\forms\PictureForm;
 use yii\web\UploadedFile;
 use yii\web\Response;
-use Intervention\Image\ImageManager;
+use yii\helpers\Url;
 
 /**
  * Default controller for the `user` module
@@ -28,7 +28,7 @@ class ProfileController extends Controller
         $currentUser = Yii::$app->user->identity;
 
         $modelPicture = new PictureForm();
-        
+
         return $this->render('view', [
                     'user' => $this->findUser($nickname),
                     'currentUser' => $currentUser,
@@ -106,18 +106,18 @@ class ProfileController extends Controller
     public function actionUploadPicture()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
-        
+
         $model = new PictureForm();
         $model->picture = UploadedFile::getInstance($model, 'picture');
 
-        if ($model->validate()) {   
-            
+        if ($model->validate()) {
+
             $user = Yii::$app->user->identity;
             $user->picture = Yii::$app->storage->saveUploadedFile($model->picture); // 15/27/30379e706840f951d22de02458a4788eb55f.jpg
-            
+
             if ($user->save(false, ['picture'])) {
                 return [
-                    'success' => true, 
+                    'success' => true,
                     'pictureUri' => Yii::$app->storage->getFile($user->picture),
                 ];
             }
@@ -125,34 +125,23 @@ class ProfileController extends Controller
         return ['success' => false, 'errors' => $model->getErrors()];
     }
 
-//    public function actionDeletePicture()
-//    {
-//
-//        /* @var $currentUser User */
-//        $currentUser = Yii::$app->user->identity;
-//
-//        if ($currentUser->picture) {
-//            Yii::$app->storage->deleteFile($currentUser->picture);
-//            Yii::$app->session->setFlash('success', 'Picture is deleted');
-//        }
-//    }
+    /**
+     * Update users profile
+     * @param int $id
+     * @return mixed
+     */
+    public function actionUpdate($id)
+    {
 
-//        public function actionGenerate()
-//    {
-//        $faker = \Faker\Factory::create();
-//        
-//        for ($i = 0; $i < 500; $i++) {
-//            $user = new User([
-//                'username' => $faker->name,
-//                'email' => $faker->email,
-//                'about' => $faker->text(200),
-//                'nickname' => $faker->regexify('[A-Za-z0-9_]{5,15}'),
-//                'auth_key' => Yii::$app->security->generateRandomString(),
-//                'password_hash' => Yii::$app->security->generateRandomString(),
-//                'created_at' => $time = time(),
-//                'updated_at' => $time,
-//            ]);
-//            $user->save(false);
-//        }
-//    }
+        $model = $this->findUserById($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Profile edited');
+            return $this->redirect(Url::to(['/user/profile/view', 'nickname' => $model->nickname ? $model->nickname : $model->id]));
+        }
+        return $this->render('update', [
+                    'model' => $model,
+        ]);
+    }
+
 }

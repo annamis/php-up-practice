@@ -35,6 +35,17 @@ class PostForm extends Model
     }
 
     /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'description' => Yii::t('postForm', 'Description'),
+            'picture' => Yii::t('postForm', 'Picture'),
+        ];
+    }
+
+    /**
      * @param User $user
      */
     //используется для передачи данных из контроллера в модель (в примере в методе save() 

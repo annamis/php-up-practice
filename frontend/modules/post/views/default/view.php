@@ -52,9 +52,6 @@ use yii\helpers\HtmlPurifier;
                                 <div class="post-date">
                                     <span><?php echo Yii::$app->formatter->asRelativeTime($post->created_at); ?></span>    
                                 </div>
-                                <div class="post-report">
-                                    <a href="#">Report post</a>    
-                                </div>
                             </div>
                         </article>
                         <!-- feed item -->

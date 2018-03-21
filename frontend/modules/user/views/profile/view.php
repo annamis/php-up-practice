@@ -47,10 +47,10 @@ $this->title = Html::encode($user->username);
                                         ],
                                     ]);
                                     ?>
-                                    <a href="#" class="btn btn-default">Edit profile</a>
+                                    <a href="<?php echo Url::to(['/user/profile/update', 'id' => $user->getId()]); ?>" class="btn btn-default"><?php echo Yii::t('view', 'Edit profile'); ?></a>
                                 <?php endif; ?>
 
-                                <div class="alert alert-success display-none" id="profile-image-success">Profile image updated</div>
+                                <div class="alert alert-success display-none" id="profile-image-success"><?php echo Yii::t('view', 'Profile image updated') ?></div>
                                 <div class="alert alert-danger display-none padding-top-20" id="profile-image-fail"></div>
 
                             </div>
@@ -59,13 +59,13 @@ $this->title = Html::encode($user->username);
                             </div>
                             <?php if ($currentUser && !$currentUser->equals($user)): ?>
                                 <?php if ($currentUser->checkSubscription($user)): ?>
-                                    <a href="<?php echo Url::to(['/user/profile/unsubscribe', 'id' => $user->getId()]); ?>" class="btn btn-danger">Unsubscribe</a>
+                                    <a href="<?php echo Url::to(['/user/profile/unsubscribe', 'id' => $user->getId()]); ?>" class="btn btn-danger"><?php echo Yii::t('view', 'Unsubscribe') ?></a>
                                 <?php else: ?>
-                                    <a href="<?php echo Url::to(['/user/profile/subscribe', 'id' => $user->getId()]); ?>" class="btn btn-success">Subscribe</a>
+                                    <a href="<?php echo Url::to(['/user/profile/subscribe', 'id' => $user->getId()]); ?>" class="btn btn-success"><?php echo Yii::t('view', 'Subscribe') ?></a>
                                 <?php endif; ?>
-                                <hr>
-                                <h5>Friends, who are also following <?php echo Html::encode($user->username) ?>:</h5>
                                 <?php foreach ($currentUser->getMutualSubscriptionsTo($user) as $item): ?>
+                                    <hr>
+                                    <h5><?php echo Yii::t('view', 'Friends, who are also following {username}', ['username' => Html::encode($user->username)]); ?> :</h5>
                                     <a href="<?php echo Url::to(['/user/profile/view', 'nickname' => ($item['nickname']) ? $item['nickname'] : $item['id']]); ?>">
                                         <?php echo Html::encode($item['username']); ?>
                                     </a>
@@ -75,13 +75,13 @@ $this->title = Html::encode($user->username);
 
                             <div class="profile-bottom">
                                 <div class="profile-post-count">
-                                    <span><?php echo $user->countPosts(); ?> posts</span>
+                                    <span><?php echo $user->countPosts(); ?> <?php echo Yii::t('view', 'posts'); ?></span>
                                 </div>
                                 <div class="profile-followers">
-                                    <a href="#" data-toggle="modal" data-target="#Followers"><?php echo $user->countFollowers(); ?> followers</a>
+                                    <a href="#" data-toggle="modal" data-target="#Followers"><?php echo $user->countFollowers(); ?> <?php echo Yii::t('view', 'followers'); ?></a>
                                 </div>
                                 <div class="profile-following">
-                                    <a href="#" data-toggle="modal" data-target="#Subscriptions"><?php echo $user->countSubscriptions(); ?> following</a>    
+                                    <a href="#" data-toggle="modal" data-target="#Subscriptions"><?php echo $user->countSubscriptions(); ?> <?php echo Yii::t('view', 'following'); ?></a>    
                                 </div>
                             </div>
                         </article>

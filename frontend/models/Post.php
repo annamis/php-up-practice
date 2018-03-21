@@ -23,8 +23,8 @@ class Post extends \yii\db\ActiveRecord
     {
         return 'post';
     }
-
-    /**
+    
+        /**
      * @inheritdoc
      */
     public function attributeLabels()

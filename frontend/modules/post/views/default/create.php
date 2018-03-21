@@ -4,6 +4,7 @@
 
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
+use Yii;
 ?>
 
 <div class="post-default-index">
@@ -15,9 +16,9 @@ use yii\helpers\Html;
         <?php echo $form->field($model, 'picture')->fileInput(); ?>
     
         <?php echo $form->field($model, 'description'); ?>
-    
-        <?php echo Html::submitButton('Create', ['class' => 'btn btn-primary']); ?>
-    
+
+        <?php echo Html::submitButton(Yii::t('create', 'Create'), ['class' => 'btn btn-primary']); ?>
+    <br><br>
     <?php ActiveForm::end(); ?>
     
 </div>

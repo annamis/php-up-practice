@@ -57,9 +57,22 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
+            [['username', 'email', 'about'], 'safe'],
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
             ['nickname', 'string', 'length' => [5, 15]],
+        ];
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'id' => Yii::t('user', 'ID'),
+            'username' => Yii::t('user', 'Username'),
+            'email' => Yii::t('user', 'Email'),
+            'about' => Yii::t('user', 'About'),
+            'nickname' => Yii::t('user', 'Nickname'),
+            'picture' => Yii::t('user', 'Picture'),
         ];
     }
 
@@ -341,7 +354,7 @@ class User extends ActiveRecord implements IdentityInterface
         $redis = Yii::$app->redis;
         return (bool) $redis->sismember("user:{$this->getId()}:likes", $postId);
     }
-    
+
     /**
      * @return array|Post[]
      */
@@ -349,7 +362,7 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return $this->hasMany(Post::className(), ['user_id' => 'id'])->all();
     }
-    
+
     /**
      * @return integer
      */

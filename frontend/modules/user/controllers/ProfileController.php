@@ -18,7 +18,7 @@ class ProfileController extends Controller
 {
 
     /**
-     * User's profile.
+     * Users profile.
      *
      * @return mixed
      */
@@ -27,10 +27,17 @@ class ProfileController extends Controller
         /* @var $currentUser User */
         $currentUser = Yii::$app->user->identity;
 
+        $user = $this->findUser($nickname);
+        if ($user->status == User::STATUS_DISABLED || $user->status == User::STATUS_DELETED) {
+            return $this->render('disabled', [
+                        'user' => $user,
+            ]);
+        }
+
         $modelPicture = new PictureForm();
 
         return $this->render('view', [
-                    'user' => $this->findUser($nickname),
+                    'user' => $user,
                     'currentUser' => $currentUser,
                     'modelPicture' => $modelPicture,
         ]);
@@ -44,7 +51,10 @@ class ProfileController extends Controller
      */
     public function findUser($nickname)
     {
-        if ($user = User::find()->where(['nickname' => $nickname])->orWhere(['id' => $nickname])->one()) {
+        if ($user = User::find()
+                ->where(['nickname' => $nickname])
+                ->orWhere(['id' => $nickname])
+                ->one()) {
             return $user;
         }
         throw new NotFoundHttpException('User is not found');
@@ -127,21 +137,43 @@ class ProfileController extends Controller
 
     /**
      * Update users profile
-     * @param int $id
+     * @param string $nickname
      * @return mixed
      */
-    public function actionUpdate($id)
+    public function actionUpdate($nickname)
     {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['/user/default/login']);
+        }
 
-        $model = $this->findUserById($id);
+        $model = $this->findUser($nickname);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             Yii::$app->session->setFlash('success', 'Profile edited');
-            return $this->redirect(Url::to(['/user/profile/view', 'nickname' => $model->nickname ? $model->nickname : $model->id]));
+            return $this->redirect(Url::to(['/user/profile/view', 'nickname' => $model->getNickname()]));
         }
         return $this->render('update', [
                     'model' => $model,
         ]);
+    }
+
+    /**
+     * Temporary disable users profile
+     * @param string $nickname
+     * @return mixed
+     */
+    public function actionDisable($nickname)
+    {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['/user/default/login']);
+        }
+
+        $model = $this->findUser($nickname);
+
+        if ($model->disableUser()) {
+            Yii::$app->session->setFlash('success', 'Your profile was deleted. You can come back any time.');
+            return $this->redirect(['/user/default/login']);
+        }
     }
 
 }

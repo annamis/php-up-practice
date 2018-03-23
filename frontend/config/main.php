@@ -54,12 +54,19 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'profile/update/<nickname:\w+>' => 'user/profile/update',
+                'profile/delete/<nickname:\w+>' => 'user/profile/delete',
                 'profile/<nickname:\w+>' => 'user/profile/view',
                 'post/<id:\d+>' => 'post/default/view',
+                'post/create' => 'post/default/create',
+                'newsfeed' => 'site/index',
             ],
         ],
         'feedService' => [
             'class' => 'frontend\components\FeedService',
+        ],
+        'postService' => [
+            'class' => 'frontend\components\PostService',
         ],
         'i18n' => [
             'translations' => [

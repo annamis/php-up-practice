@@ -19,7 +19,7 @@ echo Html::submitButton('Save', [
 <?php ActiveForm::end(); ?>
 <br>
 <?=
-Html::a('Delete', ['/user/profile/delete', 'id' => $model->id], [
+Html::a('Delete', ['/user/profile/disable', 'nickname' => $model->getNickname()], [
     'class' => 'btn btn-danger',
     'data' => [
         'confirm' => 'Are you sure you want to delete your profile?',

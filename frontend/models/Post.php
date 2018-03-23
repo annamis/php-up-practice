@@ -16,6 +16,10 @@ use Yii;
 class Post extends \yii\db\ActiveRecord
 {
 
+    const STATUS_DELETED = 0;
+    const STATUS_DISABLED = 5;
+    const STATUS_ACTIVE = 10;
+
     /**
      * @inheritdoc
      */
@@ -23,8 +27,8 @@ class Post extends \yii\db\ActiveRecord
     {
         return 'post';
     }
-    
-        /**
+
+    /**
      * @inheritdoc
      */
     public function attributeLabels()
@@ -123,12 +127,12 @@ class Post extends \yii\db\ActiveRecord
      */
     public function complain(User $user)
     {
-         /* @var $redis Connection */
+        /* @var $redis Connection */
         $redis = Yii::$app->redis;
         $key = "post:{$this->getId()}:complaints"; //формируем ключ post:10:complaints
-        
+
         if (!$redis->sismember($key, $user->getId())) { //если в множестве нет id пользователя (еще не жаловался)
-            $redis->sadd($key, $user->getId());        
+            $redis->sadd($key, $user->getId());
             $this->complaints++; //увеличиваем счетчик жалоб
             return $this->save(false, ['complaints']); //сохраняем этот счетчик в таблице post в поле complaints 
         }

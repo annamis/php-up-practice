@@ -47,7 +47,7 @@ $this->title = Html::encode($user->username);
                                         ],
                                     ]);
                                     ?>
-                                    <a href="<?php echo Url::to(['/user/profile/update', 'id' => $user->getId()]); ?>" class="btn btn-default"><?php echo Yii::t('view', 'Edit profile'); ?></a>
+                                <a href="<?php echo Url::to(['/user/profile/update', 'nickname' => $user->getNickname()]); ?>" class="btn btn-default"><?php echo Yii::t('view', 'Edit profile'); ?></a>
                                 <?php endif; ?>
 
                                 <div class="alert alert-success display-none" id="profile-image-success"><?php echo Yii::t('view', 'Profile image updated') ?></div>

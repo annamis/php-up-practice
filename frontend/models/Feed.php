@@ -21,6 +21,10 @@ use Yii;
 class Feed extends \yii\db\ActiveRecord
 {
 
+    const STATUS_DELETED = 0;
+    const STATUS_DISABLED = 5;
+    const STATUS_ACTIVE = 10;
+
     /**
      * @inheritdoc
      */
@@ -45,6 +49,14 @@ class Feed extends \yii\db\ActiveRecord
             'post_filename' => 'Post Filename',
             'post_description' => 'Post Description',
             'post_created_at' => 'Post Created At',
+        ];
+    }
+
+    public function rules()
+    {
+        return [
+            ['status', 'default', 'value' => self::STATUS_ACTIVE],
+            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED, self::STATUS_DISABLED]],
         ];
     }
 

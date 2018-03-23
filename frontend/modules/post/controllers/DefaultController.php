@@ -54,7 +54,13 @@ class DefaultController extends Controller
         $currentUser = Yii::$app->user->identity;
 
         $post = $this->findPost($id);
-
+        
+        if ($post->status == Post::STATUS_DISABLED || $post->status == Post::STATUS_DELETED) {
+            return $this->render('disabled', [
+                        'post' => $post,
+            ]);
+        }
+        
         if ($currentUser) {
             $model = new CommentForm($currentUser, $id);
             if ($model->load(Yii::$app->request->post()) && $model->save()) {

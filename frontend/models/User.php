@@ -7,6 +7,7 @@ use yii\base\NotSupportedException;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 use yii\behaviors\TimestampBehavior;
+use frontend\models\events\UserDisabledEvent;
 
 /**
  * User model
@@ -30,8 +31,13 @@ class User extends ActiveRecord implements IdentityInterface
 {
 
     const STATUS_DELETED = 0;
+    const STATUS_DISABLED = 5;
     const STATUS_ACTIVE = 10;
+    
     const DEFAULT_IMAGE = '/img/profile_default_image.jpg';
+    const DISABLED_STATUS_IMAGE = '/img/profile_disabled_image.jpg';
+    
+    const EVENT_USER_DISABLED = "user_disabled";
 
     /**
      * @inheritdoc
@@ -57,10 +63,15 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
+            [['username', 'email', 'nickname'], 'trim'],
             [['username', 'email', 'about'], 'safe'],
+            [['email', 'nickname'], 'unique', 'targetClass' => User::className()],
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
+            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED, self::STATUS_DISABLED]],
             ['nickname', 'string', 'length' => [5, 15]],
+            // проверяет, что "nickname" начинается с буквы и содержит только буквенные символы,
+            // числовые символы и знак подчеркивания
+            ['nickname', 'match', 'message' => 'The nickname must contain only lowercase letters, numbers and underscores.', 'pattern' => '/^[a-z]\w*$/i']
         ];
     }
 
@@ -74,6 +85,12 @@ class User extends ActiveRecord implements IdentityInterface
             'nickname' => Yii::t('user', 'Nickname'),
             'picture' => Yii::t('user', 'Picture'),
         ];
+    }
+
+    public function __construct()
+    {
+        $this->on(self::EVENT_USER_DISABLED, [Yii::$app->feedService, 'disableFeeds']);
+        $this->on(self::EVENT_USER_DISABLED, [Yii::$app->postService, 'disablePosts']);
     }
 
     /**
@@ -93,9 +110,9 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Finds user by username
+     * Finds user by email
      *
-     * @param string $username
+     * @param string $email
      * @return static|null
      */
     public static function findByEmail($email)
@@ -325,6 +342,9 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function getPicture()
     {
+        if ($this->status == User::STATUS_DISABLED || $this->status == User::STATUS_DELETED) {
+            return self::DISABLED_STATUS_IMAGE;
+        }
         if ($this->picture) {
             return Yii::$app->storage->getFile($this->picture);
         }
@@ -340,7 +360,12 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $order = ['post_created_at' => SORT_DESC]; //по дате по спаданию
         //для каждого пользователя можно найти несколько записей в таблице Feed 1:M
-        return $this->hasMany(Feed::className(), ['user_id' => 'id'])->orderBy($order)->limit($limit)->all();
+        return $this
+                        ->hasMany(Feed::className(), ['user_id' => 'id'])
+                        ->where(['status' => self::STATUS_ACTIVE])
+                        ->orderBy($order)
+                        ->limit($limit)
+                        ->all();
     }
 
     /**
@@ -369,6 +394,20 @@ class User extends ActiveRecord implements IdentityInterface
     public function countPosts()
     {
         return $this->hasMany(Post::className(), ['user_id' => 'id'])->count();
+    }
+
+    /**
+     * @return integer
+     */
+    public function disableUser()
+    {
+        $this->status = self::STATUS_DISABLED;
+        if ($this->update()) {
+            $event = new UserDisabledEvent;
+            $event->user = $this;
+            $this->trigger(self::EVENT_USER_DISABLED, $event);
+        }
+        return true;
     }
 
 }

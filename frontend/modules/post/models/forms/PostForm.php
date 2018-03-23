@@ -31,6 +31,8 @@ class PostForm extends Model
                 'checkExtensionByMimeType' => true,
                 'maxSize' => $this->getMaxFileSize()],
             [['description'], 'string', 'max' => self::MAX_DESCRIPTION_LENGHT],
+            ['status', 'default', 'value' => Post::STATUS_ACTIVE],
+            ['status', 'in', 'range' => [Post::STATUS_ACTIVE, Post::STATUS_DELETED, Post::STATUS_DISABLED]],
         ];
     }
 

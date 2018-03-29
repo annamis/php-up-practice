@@ -2,13 +2,9 @@
 /* @var $this yii\web\View */
 /* @var $user frontend\models\User */
 /* @var $currentUser frontend\models\User */
-/* @var $modelPicture frontend\modules\user\models\forms\PictureForm */
-/* @var $post frontend\models\Post */
 
 use yii\helpers\Html;
-use yii\helpers\HtmlPurifier;
 use yii\helpers\Url;
-use dosamigos\fileupload\FileUpload;
 
 $this->title = Html::encode($user->username);
 ?>
@@ -29,6 +25,9 @@ $this->title = Html::encode($user->username);
                             <div class="profile-description">
                                 <p>This page was deleted. Information is unavaliable.</p>
                             </div>
+                            <?php if ($currentUser->equals($user)): ?>
+                            <a href="<?php echo Url::to(['/user/profile/recover', 'nickname' => $user->getNickname()]); ?>" class="btn btn-danger">Recover account</a>
+                            <?php endif; ?>
                         </article>
                     </div>
                 </div>

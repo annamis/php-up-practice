@@ -10,12 +10,23 @@ use frontend\modules\user\models\forms\PictureForm;
 use yii\web\UploadedFile;
 use yii\web\Response;
 use yii\helpers\Url;
+use frontend\controllers\behaviors\AccessBehavior;
 
 /**
  * Default controller for the `user` module
  */
 class ProfileController extends Controller
 {
+
+//    public function behaviors()
+//    {
+//        return [
+//            [
+//                'class' => AccessBehavior::className(),
+//                'only' => ['subscribe', 'unsubscribe', 'upload-picture', 'update', 'disable'],
+//            ],
+//        ];
+//    }
 
     /**
      * Users profile.
@@ -31,6 +42,7 @@ class ProfileController extends Controller
         if ($user->status == User::STATUS_DISABLED || $user->status == User::STATUS_DELETED) {
             return $this->render('disabled', [
                         'user' => $user,
+                        'currentUser' => $currentUser,
             ]);
         }
 
@@ -171,8 +183,31 @@ class ProfileController extends Controller
         $model = $this->findUser($nickname);
 
         if ($model->disableUser()) {
+            Yii::$app->user->logout();
             Yii::$app->session->setFlash('success', 'Your profile was deleted. You can come back any time.');
             return $this->redirect(['/user/default/login']);
+        }
+    }
+
+    /**
+     * Recover users profile
+     * @param string $nickname
+     * @return mixed
+     */
+    public function actionRecover($nickname)
+    {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['/user/default/login']);
+        }
+
+        $model = $this->findUser($nickname);
+
+        if ($model->recoverUser()) {
+            Yii::$app->session->setFlash('success', 'Your profile was recovered.');
+            return $this->redirect([
+                        '/user/profile/view',
+                        'nickname' => Yii::$app->user->identity->getNickname()
+            ]);
         }
     }
 

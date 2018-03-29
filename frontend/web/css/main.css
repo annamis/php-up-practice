@@ -188,6 +188,7 @@ header .header-top .brand-logo h1 span {
     line-height: 48px;
 }
 
+.comment-user-image .author-image,
 .blog-posts .post .author-image {
     display: inline-block;
     width: 50px;
@@ -195,6 +196,9 @@ header .header-top .brand-logo h1 span {
     -webkit-border-radius: 25px;
     -moz-border-radius: 25px;
     border-radius: 25px;
+}
+
+.blog-posts .post .author-image {
     margin: -5px 10px 0 0;
 }
 

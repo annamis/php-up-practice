@@ -11,12 +11,23 @@ use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use frontend\models\forms\CommentForm;
 use frontend\models\Comment;
+use frontend\controllers\behaviors\AccessBehavior;
 
 /**
  * Default controller for the `post` module
  */
 class DefaultController extends Controller
 {
+
+//    public function behaviors()
+//    {
+//        return [
+//            [
+//                'class' => AccessBehavior::className(),
+//                'only' => ['create', 'view'],
+//            ],
+//        ];
+//    }
 
     /**
      * Renders the create view for the module
@@ -54,13 +65,13 @@ class DefaultController extends Controller
         $currentUser = Yii::$app->user->identity;
 
         $post = $this->findPost($id);
-        
+
         if ($post->status == Post::STATUS_DISABLED || $post->status == Post::STATUS_DELETED) {
             return $this->render('disabled', [
                         'post' => $post,
             ]);
         }
-        
+
         if ($currentUser) {
             $model = new CommentForm($currentUser, $id);
             if ($model->load(Yii::$app->request->post()) && $model->save()) {

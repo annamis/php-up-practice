@@ -8,6 +8,8 @@ use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 use yii\behaviors\TimestampBehavior;
 use frontend\models\events\UserDisabledEvent;
+use frontend\models\events\UserRecoveredEvent;
+use yii\helpers\ArrayHelper;
 
 /**
  * User model
@@ -33,11 +35,10 @@ class User extends ActiveRecord implements IdentityInterface
     const STATUS_DELETED = 0;
     const STATUS_DISABLED = 5;
     const STATUS_ACTIVE = 10;
-    
     const DEFAULT_IMAGE = '/img/profile_default_image.jpg';
     const DISABLED_STATUS_IMAGE = '/img/profile_disabled_image.jpg';
-    
     const EVENT_USER_DISABLED = "user_disabled";
+    const EVENT_USER_RECOVERED = "user_recovered";
 
     /**
      * @inheritdoc
@@ -91,6 +92,8 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->on(self::EVENT_USER_DISABLED, [Yii::$app->feedService, 'disableFeeds']);
         $this->on(self::EVENT_USER_DISABLED, [Yii::$app->postService, 'disablePosts']);
+        $this->on(self::EVENT_USER_RECOVERED, [Yii::$app->feedService, 'recoverFeeds']);
+        $this->on(self::EVENT_USER_RECOVERED, [Yii::$app->postService, 'recoverPosts']);
     }
 
     /**
@@ -98,7 +101,14 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentity($id)
     {
-        return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
+        $statuses = [
+            self::STATUS_ACTIVE,
+            self::STATUS_DISABLED,
+        ];
+        return static::find()
+                        ->where(['id' => $id])
+                        ->andWhere(['in', 'status', $statuses])
+                        ->one();
     }
 
     /**
@@ -117,7 +127,14 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findByEmail($email)
     {
-        return static::findOne(['email' => $email, 'status' => self::STATUS_ACTIVE]);
+        $statuses = [
+            self::STATUS_ACTIVE,
+            self::STATUS_DISABLED,
+        ];
+        return static::find()
+                        ->where(['email' => $email])
+                        ->andWhere(['in', 'status', $statuses])
+                        ->one();
     }
 
     /**
@@ -397,7 +414,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @return integer
+     * @return bool
      */
     public function disableUser()
     {
@@ -408,6 +425,42 @@ class User extends ActiveRecord implements IdentityInterface
             $this->trigger(self::EVENT_USER_DISABLED, $event);
         }
         return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function recoverUser()
+    {
+        $this->status = self::STATUS_ACTIVE;
+        if ($this->update()) {
+            $event = new UserRecoveredEvent;
+            $event->user = $this;
+            $this->trigger(self::EVENT_USER_RECOVERED, $event);
+        }
+        return true;
+    }
+
+    public function searchUser($keyword)
+    {
+        $sql = "SELECT * FROM idx_user_content WHERE MATCH('$keyword') OPTION ranker=WORDCOUNT";
+        $data = Yii::$app->sphinx->createCommand($sql)->queryAll();
+
+        //получить ids в виде простого массива без вложенностей
+        $ids = ArrayHelper::map($data, 'id', 'id');
+        //Для получения результатов используем модель User. В операторе where id должен быть одним из массива $ids.
+        $data = self::find()->where(['id' => $ids])->asArray()->all();
+        //переиндексация массивов (чтобы идентификатор элементов массива был id)
+        $data = ArrayHelper::index($data, 'id');
+        $result = [];
+        foreach ($ids as $element) {
+            $result[] = [
+                'id' => $element,
+                'username' => $data[$element]['username'],
+                'nickname' => $data[$element]['nickname'],
+            ];
+        }
+        return $result;
     }
 
 }

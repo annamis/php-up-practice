@@ -51,5 +51,17 @@ class FeedService extends Component
                 ->execute();
         return true;
     }
+    
+    public function recoverFeeds(\yii\base\Event $event)
+    {
+
+        $user = $event->getUser();
+
+        Yii::$app->db->createCommand('UPDATE feed SET status=:status WHERE author_id=:author_id')
+                ->bindValue(':status', Feed::STATUS_ACTIVE)
+                ->bindValue(':author_id', $user->id)
+                ->execute();
+        return true;
+    }
 
 }

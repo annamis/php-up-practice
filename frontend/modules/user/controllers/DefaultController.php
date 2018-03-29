@@ -7,12 +7,12 @@ use yii\base\InvalidParamException;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
 use frontend\modules\user\models\LoginForm;
 use frontend\modules\user\models\PasswordResetRequestForm;
 use frontend\modules\user\models\ResetPasswordForm;
 use frontend\modules\user\models\SignupForm;
 use frontend\modules\user\components\AuthHandler;
+use frontend\models\User;
 
 /**
  * Default controller for the `user` module
@@ -61,6 +61,12 @@ class DefaultController extends Controller
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            if (Yii::$app->user->identity->status === User::STATUS_DISABLED) {
+                return $this->redirect([
+                            '/user/profile/view',
+                            'nickname' => Yii::$app->user->identity->getNickname()
+                ]);
+            }
             return $this->goBack();
         } else {
             return $this->render('login', [

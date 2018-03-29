@@ -8,6 +8,7 @@ use yii\bootstrap\Nav;
 use frontend\assets\AppAsset;
 use frontend\assets\FontAwesomeAsset;
 use common\widgets\Alert;
+use frontend\models\User;
 
 AppAsset::register($this);
 FontAwesomeAsset::register($this);
@@ -43,10 +44,10 @@ FontAwesomeAsset::register($this);
                                     <a href="#" title="Search"><i class="fa fa-search"></i></a>
                                 </li>
                                 <li class="dropdown">
-                                    <?= Html::beginForm(['/site/language'])?>
-                                    <?= Html::dropDownList('language', Yii::$app->language, ['en-US' => 'English', 'ru-RU' => 'Русский'])?> <!--в качестве языка выбран текущий язык -->
-                                    <?= Html::submitButton('Change')?>
-                                    <?= Html::endForm()?>
+                                    <?= Html::beginForm(['/site/language']) ?>
+                                    <?= Html::dropDownList('language', Yii::$app->language, ['en-US' => 'English', 'ru-RU' => 'Русский']) ?> <!--в качестве языка выбран текущий язык -->
+                                    <?= Html::submitButton('Change') ?>
+                                    <?= Html::endForm() ?>
                                 </li>
                             </ul>
                         </div>
@@ -60,19 +61,23 @@ FontAwesomeAsset::register($this);
                             <nav class="main-menu">      
 
                                 <?php
-                                $menuItems = [
-                                    ['label' => Yii::t('menu', 'Newsfeed'), 'url' => ['/site/index']],
-                                ];
                                 if (Yii::$app->user->isGuest) {
                                     $menuItems[] = ['label' => Yii::t('menu', 'Signup'), 'url' => ['/user/default/signup']];
                                     $menuItems[] = ['label' => Yii::t('menu', 'Login'), 'url' => ['/user/default/login']];
                                 } else {
+                                    if (Yii::$app->user->identity->status === User::STATUS_ACTIVE) {
+                                        $menuItems = [
+                                            ['label' => Yii::t('menu', 'Newsfeed'), 'url' => ['/site/index']],
+                                        ];
+                                    }
                                     $menuItems[] = ['label' => Yii::t('menu', 'My profile'), 'url' => ['/user/profile/view', 'nickname' => Yii::$app->user->identity->getNickname()]];
-                                    $menuItems[] = ['label' => Yii::t('menu', 'Create post'), 'url' => ['/post/default/create']];
+                                    if (Yii::$app->user->identity->status === User::STATUS_ACTIVE) {
+                                        $menuItems[] = ['label' => Yii::t('menu', 'Create post'), 'url' => ['/post/default/create']];
+                                    }
                                     $menuItems[] = '<li>'
                                             . Html::beginForm(['/user/default/logout'], 'post')
                                             . Html::submitButton(
-                                                    Yii::t('menu', 'Logout ({username})',[ //username подставляется
+                                                    Yii::t('menu', 'Logout ({username})', [//username подставляется
                                                         'username' => Yii::$app->user->identity->username,
                                                     ]) . ' <i class="fa fa-sign-out"></i>', ['class' => 'btn btn-link logout']
                                             )

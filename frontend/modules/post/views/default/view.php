@@ -68,7 +68,7 @@ use yii\helpers\HtmlPurifier;
                                         <?php foreach ($comments as $comment): ?>
                                             <li class="comment">
                                                 <div class="comment-user-image">
-                                                    <img src="<?php echo Yii::$app->storage->getFile($comment->user->picture); ?>">
+                                                     <img src="<?php echo $comment->user->getPicture(); ?>" class="author-image" alt="Author image">
                                                 </div>
                                                 <div class="comment-info">
                                                     <h4 class="author">
@@ -78,7 +78,7 @@ use yii\helpers\HtmlPurifier;
                                                         <span>(<?php echo Yii::$app->formatter->asDatetime($comment->created_at); ?>)</span>
                                                     </h4>
                                                     <p><?php echo Html::encode($comment->content); ?></p>
-                                                    <?php if ($currentUser && $currentUser->equals($post->user)): ?>
+                                                    <?php if ($currentUser && $currentUser->equals($comment->user)): ?>
                                                         <a href="<?php echo Url::to(['/post/comment/update', 'postId' => $post->id, 'commentId' => $comment->id]); ?>">
                                                             <span class="glyphicon glyphicon-pencil grey"></span>
                                                         </a>        

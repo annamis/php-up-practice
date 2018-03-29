@@ -7,6 +7,8 @@ use frontend\models\User;
 use Yii;
 use yii\web\Cookie;
 use yii\filters\VerbFilter;
+use frontend\models\forms\SearchForm;
+use frontend\controllers\behaviors\AccessBehavior;
 
 /**
  * Site controller
@@ -37,6 +39,10 @@ class SiteController extends Controller
                     'language' => ['POST'],
                 ],
             ],
+//            [
+//                'class' => AccessBehavior::className(),
+//                'only' => ['index'],
+//            ],
         ];
     }
 
@@ -90,6 +96,23 @@ class SiteController extends Controller
             Yii::$app->response->cookies->add($languageCookie); //отправляем куки пользователю
         }
         return $this->redirect(Yii::$app->request->referrer); //возвращаем пользователя на страницу, на которой он находился
+    }
+
+    /**
+     * Search user
+     * @return mixed
+     */
+    public function actionSearch()
+    {
+        $model = new SearchForm();
+        $results = null;
+        if ($model->load(Yii::$app->request->post())) {
+            $results = $model->search();
+        }
+        return $this->render('search', [
+                    'model' => $model,
+                    'results' => $results,
+        ]);
     }
 
 }
